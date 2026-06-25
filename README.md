@@ -23,7 +23,18 @@ Copy the build output into your ModSharp install (`<sharp>` = your `sharp` direc
 | `.build/locales/serverredirect.json` | `<sharp>/locales/serverredirect.json` |
 | `.build/configs/serverredirect.jsonc.example` | `<sharp>/configs/serverredirect.jsonc` |
 
-Rename the shipped `.jsonc.example` to `.jsonc`, edit it, and restart the server (or change map) to load. Requires **CommandCenter**, **MenuManager**, and **LocalizerManager** (ship with ModSharp). The "Connect via website" button additionally needs the **Motd** module installed; without it, only the manual-connect option shows. A2S mode bundles **SteamQuery.NET**.
+Rename the shipped `.jsonc.example` to `.jsonc`, edit it, and restart the server (or change map) to load.
+
+## 🧩 Dependencies
+
+| Module | Required? | Why |
+|--------|-----------|-----|
+| CommandCenter | ✅ Required | registers the `!servers` / `!redirect` chat commands |
+| MenuManager | ✅ Required | renders the in-game server browser menu |
+| LocalizerManager | ✅ Required | all player-facing text |
+| [Motd](https://github.com/yappershq/Motd) | ⚪ Optional | the "Connect via website" button (opens the connect page). Without it, only the manual-connect option shows |
+
+Bundled: `SteamQuery.NET` (ships with the module; used only in `a2s` mode).
 
 ## ⌨️ Commands
 
