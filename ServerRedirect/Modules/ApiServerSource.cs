@@ -103,8 +103,8 @@ internal sealed class ApiServerSource : IServerSource
         return defaultValue;
     }
 
-    // Roster: an array of objects ({name,...}) or plain strings. Names are sanitized of < > so a
-    // player can't break the center-HTML menu markup.
+    // Roster: an array of objects ({name,...}) or plain strings. Names are a trust boundary — they're
+    // shown in the center-HTML menu — so they're sanitized (see Sanitize) against markup injection.
     private static IReadOnlyList<string> GetPlayerNames(JsonElement el, string arrayKey, string nameKey)
     {
         if (string.IsNullOrEmpty(arrayKey)
@@ -122,8 +122,19 @@ internal sealed class ApiServerSource : IServerSource
                 _                                                                           => null,
             };
             if (!string.IsNullOrWhiteSpace(n))
-                names.Add(n.Replace("<", string.Empty).Replace(">", string.Empty));
+                names.Add(Sanitize(n));
         }
         return names;
     }
+
+    // HTML-encode markup so a player name can't inject tags (&lt;font&gt;, &lt;img&gt;) into the
+    // center-HTML menu — encode & FIRST so an entity-encoded tag (&amp;lt;) can't reconstitute — and
+    // strip {} so a name can't inject color tokens ({green}) either. Encoding (not stripping) keeps
+    // the name visually intact.
+    private static string Sanitize(string name)
+        => name.Replace("&", "&amp;")
+               .Replace("<", "&lt;")
+               .Replace(">", "&gt;")
+               .Replace("{", string.Empty)
+               .Replace("}", string.Empty);
 }
