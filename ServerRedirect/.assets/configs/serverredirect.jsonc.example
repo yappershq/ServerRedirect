@@ -1,0 +1,53 @@
+{
+  // Chat commands that open the server browser menu (no permission required)
+  "commands": ["servers", "redirect"],
+
+  // How often (seconds) the server list is refreshed in the background
+  "cache_seconds": 30,
+
+  // Hide this server from the list shown to players
+  "exclude_self": true,
+
+  // Optional: explicit self address "1.2.3.4:27015". Leave empty for auto-detect
+  // (auto = public IP from Steam + hostport convar; domains are DNS-resolved)
+  "self_address": "",
+
+  // Data source: "api" (HTTP JSON endpoint) or "a2s" (Steam A2S queries)
+  "data_source": "api",
+
+  "api": {
+    "url": "https://cstema.lt/api/servers",
+    // Map API JSON keys to our field names
+    "fields": {
+      "name":    "name",
+      "players": "players",
+      "max":     "maxPlayers",
+      "map":     "map",
+      "address": "address",
+      "online":  "online"
+    }
+  },
+
+  "a2s": {
+    "servers": [
+      { "name": "Mix #1", "address": "cs2.cstema.lt:27015" }
+    ]
+  },
+
+  // URL template for the "Connect via website" MOTD button.
+  // {address} is replaced with the server's address (host:port)
+  "connect_url": "https://cstema.lt/connect/{address}",
+
+  "ad": {
+    "enabled": true,
+    // How often (seconds) to broadcast an advertisement to all players
+    "interval_seconds": 180,
+    // Minimum player count a server must have to be advertised
+    "min_players": 3,
+    // How to pick which server to advertise: "most_players" | "rotate" | "random"
+    "order": "most_players",
+    // Locale key for the advertisement message
+    // Args: {0}=name {1}=players {2}=max {3}=map {4}=connect_url
+    "message_key": "serverredirect.ad.line"
+  }
+}

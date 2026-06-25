@@ -1,0 +1,47 @@
+{
+  "serverredirect.menu.title": {
+    "en-us": "{{green}}Server Browser"
+  },
+  "serverredirect.menu.server_entry": {
+    "en-us": "{0}  {{gold}}{1}/{2}{{default}}  {3}"
+  },
+  "serverredirect.menu.info_map": {
+    "en-us": "Map: {{gold}}{0}"
+  },
+  "serverredirect.menu.info_players": {
+    "en-us": "Players: {{gold}}{0}/{1}"
+  },
+  "serverredirect.menu.connect_web": {
+    "en-us": "{{green}}Connect via website (MOTD)"
+  },
+  "serverredirect.menu.connect_manual": {
+    "en-us": "{{gold}}Connect manually (console)"
+  },
+  "serverredirect.menu.back": {
+    "en-us": "« Back"
+  },
+  "serverredirect.menu.exit": {
+    "en-us": "Close"
+  },
+  "serverredirect.list_header": {
+    "en-us": "{{green}}[Servers]{{default}} Available servers:"
+  },
+  "serverredirect.list_entry": {
+    "en-us": "  {{gold}}{0}{{default}} — {1}/{2} players — {3}"
+  },
+  "serverredirect.connect_hint": {
+    "en-us": "{{green}}[Connect]{{default}} Type in console: {{gold}}connect {0}"
+  },
+  "serverredirect.no_servers": {
+    "en-us": "{{darkred}}[Servers]{{default}} No other servers are online right now."
+  },
+  "serverredirect.unavailable": {
+    "en-us": "{{darkred}}[Servers]{{default}} Server list is loading, please try again in a moment."
+  },
+  "serverredirect.leave_announce": {
+    "en-us": "{{gold}}{0}{{default}} has left to join {{green}}{1}{{default}}."
+  },
+  "serverredirect.ad.line": {
+    "en-us": "{{green}}[Other Servers]{{default}} Join {{gold}}{0}{{default}} — {1}/{2} players on {3} — {{green}}{4}"
+  }
+}
