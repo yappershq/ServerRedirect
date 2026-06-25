@@ -203,34 +203,49 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
 
         menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.info_map", server.Map));
         menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.info_players", server.Players, server.Max));
-        menu.AddSpacer();
 
-        // Connect via website (MOTD)
-        if (_bridge.MotdShared is not null)
+        // Roster — when the source provides player names. Capped so a full server doesn't overflow.
+        if (server.PlayerNames.Count > 0)
         {
-            menu.AddItem(
-                c => _bridge.LocalizeHtml(c, "serverredirect.menu.connect_web"),
-                ctrl =>
-                {
-                    var client   = ctrl.Client;
-                    var captured = server;
-                    StashLeave(client, captured.Name);
-                    var url = _config.ConnectUrl.Replace("{address}", captured.Address);
-                    _bridge.MotdShared?.ShowMotd(client, MotdContent.ForUrl(url, captured.Name));
-                    ctrl.Exit();
-                });
+            const int cap = 10;
+            menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.players_header"));
+            foreach (var pn in server.PlayerNames.Take(cap))
+            {
+                var name = pn;
+                menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.player_entry", name));
+            }
+            if (server.PlayerNames.Count > cap)
+            {
+                var more = server.PlayerNames.Count - cap;
+                menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.players_more", more));
+            }
         }
 
-        // Connect manually (print connect string)
+        menu.AddSpacer();
+
+        // Single Connect action: open the website MOTD if available, otherwise print the
+        // connect command to console. Either way the player gets a chat line telling them what to do.
         menu.AddItem(
-            c => _bridge.LocalizeHtml(c, "serverredirect.menu.connect_manual"),
+            c => _bridge.LocalizeHtml(c, "serverredirect.menu.connect"),
             ctrl =>
             {
                 var client   = ctrl.Client;
                 var captured = server;
                 StashLeave(client, captured.Name);
-                client.Print(HudPrintChannel.Chat,
-                    _bridge.Localize(client, "serverredirect.connect_hint", captured.Address));
+
+                if (_bridge.MotdShared is { } motd)
+                {
+                    var url = _config.ConnectUrl.Replace("{address}", captured.Address);
+                    motd.ShowMotd(client, MotdContent.ForUrl(url));
+                    client.Print(HudPrintChannel.Chat,
+                        _bridge.Localize(client, "serverredirect.connect_web_hint", captured.Name));
+                }
+                else
+                {
+                    client.Print(HudPrintChannel.Chat,
+                        _bridge.Localize(client, "serverredirect.connect_hint", captured.Address));
+                }
+
                 ctrl.Exit();
             });
 
@@ -314,7 +329,10 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
                     _        => candidates.OrderByDescending(s => s.Players).First(), // most_players
                 };
 
-                var connectUrl = _config.ConnectUrl.Replace("{address}", pick.Address);
+                // Tell players to type `!servers <name>` rather than dumping a URL — the sub-command
+                // jumps straight to that server's connect menu. First word of the name matches the filter.
+                var firstCmd = _config.Commands.Count > 0 ? _config.Commands[0] : "servers";
+                var joinCmd  = $"{firstCmd} {pick.Name.Split(' ')[0]}";
 
                 _bridge.ModSharp.InvokeFrameAction(() =>
                 {
@@ -323,7 +341,7 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
                         if (c.IsFakeClient || c.IsHltv) continue;
                         c.Print(HudPrintChannel.Chat,
                             _bridge.Localize(c, _config.Ad.MessageKey,
-                                pick.Name, pick.Players, pick.Max, pick.Map, connectUrl));
+                                pick.Name, pick.Players, pick.Max, pick.Map, joinCmd));
                     }
                 });
             }

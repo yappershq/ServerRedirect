@@ -64,15 +64,17 @@ internal sealed class ApiServerSource : IServerSource
                 var players = GetInt(el, f.Players);
                 var max     = GetInt(el, f.Max);
                 var online  = GetBool(el, f.Online, defaultValue: true);
+                var names   = GetPlayerNames(el, f.PlayerList, f.PlayerListName);
 
                 list.Add(new ServerInfo
                 {
-                    Name    = name,
-                    Address = address,
-                    Map     = map,
-                    Players = players,
-                    Max     = max,
-                    Online  = online,
+                    Name        = name,
+                    Address     = address,
+                    Map         = map,
+                    Players     = players,
+                    Max         = max,
+                    Online      = online,
+                    PlayerNames = names,
                 });
             }
             catch (Exception e)
@@ -99,5 +101,29 @@ internal sealed class ApiServerSource : IServerSource
         if (p.ValueKind == JsonValueKind.True)  return true;
         if (p.ValueKind == JsonValueKind.False) return false;
         return defaultValue;
+    }
+
+    // Roster: an array of objects ({name,...}) or plain strings. Names are sanitized of < > so a
+    // player can't break the center-HTML menu markup.
+    private static IReadOnlyList<string> GetPlayerNames(JsonElement el, string arrayKey, string nameKey)
+    {
+        if (string.IsNullOrEmpty(arrayKey)
+            || !el.TryGetProperty(arrayKey, out var arr)
+            || arr.ValueKind != JsonValueKind.Array)
+            return [];
+
+        var names = new List<string>();
+        foreach (var item in arr.EnumerateArray())
+        {
+            string? n = item.ValueKind switch
+            {
+                JsonValueKind.String                                                        => item.GetString(),
+                JsonValueKind.Object when item.TryGetProperty(nameKey, out var p)            => p.GetString(),
+                _                                                                           => null,
+            };
+            if (!string.IsNullOrWhiteSpace(n))
+                names.Add(n.Replace("<", string.Empty).Replace(">", string.Empty));
+        }
+        return names;
     }
 }

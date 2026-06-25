@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace ServerRedirect.Modules;
 
 /// <summary>Normalized server record returned by any IServerSource implementation.</summary>
@@ -10,4 +12,6 @@ internal sealed class ServerInfo
     /// <summary>host:port string, e.g. "1.2.3.4:27015" or "cs2.cstema.lt:27015".</summary>
     public string Address { get; init; } = string.Empty;
     public bool   Online  { get; init; } = true;
+    /// <summary>In-game player names, when the source provides a roster (empty otherwise).</summary>
+    public IReadOnlyList<string> PlayerNames { get; init; } = [];
 }

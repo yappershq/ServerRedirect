@@ -11,11 +11,20 @@
   "serverredirect.menu.info_players": {
     "en-us": "Players: {{gold}}{0}/{1}"
   },
-  "serverredirect.menu.connect_web": {
-    "en-us": "{{green}}Connect via website (MOTD)"
+  "serverredirect.menu.connect": {
+    "en-us": "{{green}}Connect to this server"
   },
-  "serverredirect.menu.connect_manual": {
-    "en-us": "{{gold}}Connect manually (console)"
+  "serverredirect.menu.players_header": {
+    "en-us": "{{lime}}Players online:"
+  },
+  "serverredirect.menu.player_entry": {
+    "en-us": "  {{default}}{0}"
+  },
+  "serverredirect.menu.players_more": {
+    "en-us": "  {{gold}}…and {0} more"
+  },
+  "serverredirect.connect_web_hint": {
+    "en-us": "{{green}}[Connect]{{default}} Opening {{gold}}{0}{{default}} — click {{green}}Connect{{default}} on the panel that just opened to join."
   },
   "serverredirect.menu.back": {
     "en-us": "« Back"
@@ -45,6 +54,6 @@
     "en-us": "{{gold}}{0}{{default}} has left to join {{green}}{1}{{default}}."
   },
   "serverredirect.ad.line": {
-    "en-us": "{{green}}[Other Servers]{{default}} Join {{gold}}{0}{{default}} — {1}/{2} players on {3} — {{green}}{4}"
+    "en-us": "{{green}}[Other Servers]{{default}} Join {{gold}}{0}{{default}} — {1}/{2} players on {3} — type {{gold}}!{4}{{default}} to join"
   }
 }

@@ -96,6 +96,11 @@ internal sealed class ApiFieldMap
     [JsonPropertyName("map")]     public string Map     { get; set; } = "map";
     [JsonPropertyName("address")] public string Address { get; set; } = "address";
     [JsonPropertyName("online")]  public string Online  { get; set; } = "online";
+
+    /// <summary>JSON key of the player-roster array (e.g. "playerList"). Empty disables the roster.</summary>
+    [JsonPropertyName("player_list")]      public string PlayerList     { get; set; } = "playerList";
+    /// <summary>Key holding each player's name inside a roster entry (e.g. "name").</summary>
+    [JsonPropertyName("player_list_name")] public string PlayerListName { get; set; } = "name";
 }
 
 internal sealed class A2sConfig
