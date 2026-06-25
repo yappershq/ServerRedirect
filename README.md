@@ -27,14 +27,15 @@ Rename the shipped `.jsonc.example` to `.jsonc`, edit it, and restart the server
 
 ## 🧩 Dependencies
 
-| Module | Required? | Why |
+Uses the **ModSharp first-party modules** (ship with ModSharp): **CommandCenter** (commands), **MenuManager** (menu), **LocalizerManager** (text).
+
+External plugins:
+
+| Plugin | Required? | Why |
 |--------|-----------|-----|
-| CommandCenter | ✅ Required | registers the `!servers` / `!redirect` chat commands |
-| MenuManager | ✅ Required | renders the in-game server browser menu |
-| LocalizerManager | ✅ Required | all player-facing text |
 | [Motd](https://github.com/yappershq/Motd) | ⚪ Optional | the "Connect via website" button (opens the connect page). Without it, only the manual-connect option shows |
 
-Bundled: `SteamQuery.NET` (ships with the module; used only in `a2s` mode).
+Bundled: `SteamQuery.NET` (ships inside the module; used only in `a2s` mode).
 
 ## ⌨️ Commands
 
