@@ -199,9 +199,15 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
     private Menu BuildServerInfoMenu(ServerInfo server)
     {
         var menu = new Menu();
+        // The API's `players` count and `playerList` can disagree (a cstema.lt data bug) — show the
+        // roster size we actually list so the title never says "0/15" above a visible player.
+        var count = server.PlayerNames.Count > 0 ? server.PlayerNames.Count : server.Players;
         // Stats in the title so they're always visible; the page only fits 5 body items, so we keep
         // those for the action + as many player names as possible (prefix: connect first, then players).
-        menu.SetTitle($"{server.Name}   {server.Players}/{server.Max}   {server.Map}".TrimEnd());
+        menu.SetTitle($"{server.Name}   {count}/{server.Max}   {server.Map}".TrimEnd());
+
+        // Numbers off (the player rows aren't real options) — only the Connect line carries a manual "1.".
+        menu.SetShowIndex(false);
 
         // Connect first (selectable) — the cursor lands here, so it stays at the top of the page view.
         menu.AddItem(
@@ -228,12 +234,17 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
                 ctrl.Exit();
             });
 
-        // Then every player as a selectable entry. They must be AddItem (not disabled) so the cursor
-        // can page through them — the menu is scrollable via F3/F4. Selecting a name is a no-op.
-        foreach (var pn in server.PlayerNames)
+        // Colored header to set the roster apart from the action, then every player as a selectable
+        // entry. They must be AddItem (not disabled) so the cursor can page through them — the menu is
+        // scrollable via F3/F4. Selecting a name is a no-op.
+        if (server.PlayerNames.Count > 0)
         {
-            var name = pn;
-            menu.AddItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.player_entry", name), _ => { });
+            menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.players_header"));
+            foreach (var pn in server.PlayerNames)
+            {
+                var name = pn;
+                menu.AddItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.player_entry", name), _ => { });
+            }
         }
 
         menu.AddBackItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.back"));

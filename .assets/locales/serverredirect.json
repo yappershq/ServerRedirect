@@ -6,7 +6,10 @@
     "en-us": "{0}  {{gold}}{1}/{2}{{default}}  {3}"
   },
   "serverredirect.menu.connect": {
-    "en-us": "{{green}}Connect to this server"
+    "en-us": "{{green}}1. Connect to this server"
+  },
+  "serverredirect.menu.players_header": {
+    "en-us": "{{lightgreen}}── PLAYERS ──"
   },
   "serverredirect.menu.player_entry": {
     "en-us": "{{default}}{0}"
