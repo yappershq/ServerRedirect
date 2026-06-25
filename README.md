@@ -66,8 +66,8 @@ With no argument, the menu is **server list** (name · players/max · map) → *
 | `connect_url` | `https://cstema.lt/connect/{address}` | URL opened by the "Connect via website" MOTD; `{address}` is substituted |
 | `ad.enabled` | `true` | Periodic chat advertisement |
 | `ad.interval_seconds` | `180` | How often to advertise |
-| `ad.min_players` | `3` | Skip advertising near-empty servers |
-| `ad.order` | `"most_players"` | Which server to advertise: `most_players` / `rotate` / `random` |
+| `ad.min_players` | `1` | Skip advertising servers below this player count |
+| `ad.order` | `"rotate"` | Which server to advertise: `rotate` / `most_players` / `random` |
 | `ad.message_key` | `serverredirect.ad.line` | Locale key for the ad line |
 
 The `api.fields` map is what makes this work against **any** API — remap the keys to match your own JSON shape; the defaults match the cstema.lt schema.
@@ -75,6 +75,35 @@ The `api.fields` map is what makes this work against **any** API — remap the k
 ## 🔧 How it works
 
 A background task refreshes the server list every `cache_seconds` from the configured source (HTTP API or A2S). The cache is replaced **only on a successful fetch**, so a web redeploy or a server timeout never empties the in-game menu — players keep seeing the last-known list. The current server is excluded by matching its public IP (`ISteamApi.GetPublicIP()`) + `hostport` against each entry (domain addresses are DNS-resolved). "Connect via website" opens `connect_url` through the Motd module (the page launches `steam://connect/<ip:port>`); "Connect manually" prints the `connect` command to console. All player-facing text goes through LocalizerManager (`locales/serverredirect.json`).
+
+## 🔌 Connecting players (the connect page)
+
+> **Operators must host this** — the plugin can't join a player directly.
+
+CS2's in-game panel can only open a **URL**, not run a `connect`. So "Connect via website" opens your `connect_url` (default `https://cstema.lt/connect/{address}`, where `{address}` is the target server's `host:port`) in the MOTD panel, and **you host a page at that URL that bounces the browser to `steam://connect/<ip:port>`**. Steam picks up the `steam://` scheme and joins the player.
+
+Point `connect_url` at a page you control that, given `{address}` (`host:port`):
+
+1. splits off the host and port,
+2. resolves the host to an IP (`steam://connect/` wants an address — skip if it's already an IP),
+3. redirects the browser to `steam://connect/<ip>:<port>`.
+
+Minimal reference (the cstema.lt page, Next.js):
+
+```tsx
+// pages/connect/[address].tsx
+export const getServerSideProps = async ({ params }) => {
+  const [host, port = "27015"] = params.address.split(":");
+  const ip = await dnsLookup(host);                      // steam:// wants an address
+  return { props: { steamUrl: `steam://connect/${ip}:${port}` } };
+};
+// client: hand the steam:// URL to the browser, plus a manual fallback link
+useEffect(() => { window.location.href = steamUrl; }, [steamUrl]);
+```
+
+A static host works too — even `<meta http-equiv="refresh" content="0; url=steam://connect/IP:PORT">` does the job. The only requirement is that visiting the URL hands a `steam://connect/...` to the browser.
+
+If you don't host such a page (or don't install [Motd](https://github.com/yappershq/Motd)), players use **"Connect manually"**, which prints `connect <ip:port>` to their console instead.
 
 ## 📦 Build
 

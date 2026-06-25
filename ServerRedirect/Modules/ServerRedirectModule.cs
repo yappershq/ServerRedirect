@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Motd.Shared;
 using ServerRedirect.Configuration;
 using Sharp.Modules.CommandCenter.Shared;
 using Sharp.Modules.MenuManager.Shared;
@@ -221,7 +220,7 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
                 if (_bridge.MotdShared is { } motd)
                 {
                     var url = _config.ConnectUrl.Replace("{address}", captured.Address);
-                    motd.ShowMotd(client, MotdContent.ForUrl(url));
+                    motd.ShowMotd(client, url);
                     client.Print(HudPrintChannel.Chat,
                         _bridge.Localize(client, "serverredirect.connect_web_hint", captured.Name));
                 }
