@@ -16,7 +16,7 @@
     <PackageReference Include="SteamQuery.NET" Version="2.0.2" />
     <!-- Motd.Shared — optional, resolved in OAM. Compile-time only; the runtime DLL is provided by
          the Motd plugin via /game/sharp/shared/. -->
-    <PackageReference Include="YappersHQ.Motd.Shared" Version="1.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="YappersHQ.Motd.Shared" Version="1.1.0" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <!-- Ship .assets/* into .build/ so modsharp-deploy bundles it to /game/sharp/. -->
