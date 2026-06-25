@@ -74,45 +74,34 @@ The `api.fields` map is what makes this work against **any** API — remap the k
 
 ## 🔧 How it works
 
-A background task refreshes the server list every `cache_seconds` from the configured source (HTTP API or A2S). The cache is replaced **only on a successful fetch**, so a web redeploy or a server timeout never empties the in-game menu — players keep seeing the last-known list. The current server is excluded by matching its public IP (`ISteamApi.GetPublicIP()`) + `hostport` against each entry (domain addresses are DNS-resolved). "Connect via website" opens `connect_url` through the Motd module (the page launches `steam://connect/<ip:port>`); "Connect manually" prints the `connect` command to console. All player-facing text goes through LocalizerManager (`locales/serverredirect.json`).
+A background task refreshes the server list every `cache_seconds` from the configured source (HTTP API or A2S). The cache is replaced **only on a successful fetch**, so a web redeploy or a server timeout never empties the in-game menu — players keep seeing the last-known list. The current server is excluded by matching its public IP (`ISteamApi.GetPublicIP()`) + `hostport` against each entry (domain addresses are DNS-resolved). "Connect via website" opens `connect_url` through the Motd module (the page redirects to `steam://run/730//+connect%20<host:port>`, which launches CS2 and connects); "Connect manually" prints the `connect` command to console. All player-facing text goes through LocalizerManager (`locales/serverredirect.json`).
 
 ## 🔌 Connecting players (the connect page)
 
 > **Operators must host this** — the plugin can't join a player directly.
 
-CS2's in-game panel can only open a **URL**, not run a `connect`. So "Connect via website" opens your `connect_url` (default `https://cstema.lt/connect/{address}`, where `{address}` is the target server's `host:port`) in the MOTD panel, and **you host a page at that URL that bounces the browser to `steam://connect/<ip:port>`**. Steam picks up the `steam://` scheme and joins the player.
+CS2's in-game panel can only open a **URL**, not run a `connect`. So "Connect via website" opens your `connect_url` (default `https://cstema.lt/connect/{address}`, where `{address}` is the target server's `host:port`) in the MOTD panel, and **you host a page at that URL that redirects to `steam://run/730//+connect%20<host>:<port>`**. Steam launches CS2 (app `730`) with a `+connect` launch arg and joins the player — it works even when the game isn't already running, and accepts a **hostname** (the game resolves it), so no DNS lookup is needed. Note the URL-encoded space (`%20`) between `+connect` and the address.
 
 Point `connect_url` at a page you control that, given `{address}` (`host:port`):
 
-1. splits off the host and port,
-2. resolves the host to an IP (`steam://connect/` wants an address — skip if it's already an IP),
-3. redirects the browser to `steam://connect/<ip>:<port>`.
+1. **validates** it's a real `host:port` (don't skip this — see the security note),
+2. redirects to `steam://run/730//+connect%20<host>:<port>`.
 
-Minimal reference (the cstema.lt page, Next.js):
+Minimal reference (the cstema.lt page, Next.js — a server-side 301):
 
 ```tsx
-// pages/connect/[address].tsx
-export const getServerSideProps = async ({ params }) => {
-  const [host, port = "27015"] = params.address.split(":");
-  const ip = await dnsLookup(host);                      // steam:// wants an address
-  return { props: { steamUrl: `steam://connect/${ip}:${port}` } };
-};
-// client: hand the steam:// URL to the browser, plus a manual fallback link
-useEffect(() => { window.location.href = steamUrl; }, [steamUrl]);
+// pages/connect/[address].tsx — getServerSideProps({ params, res })
+const address = params.address as string;
+// Strict host:port only — reject anything else (see security note below).
+if (!/^[A-Za-z0-9.-]{1,253}:\d{1,5}$/.test(address)) return { notFound: true };
+res.writeHead(301, { Location: `steam://run/730//+connect%20${address}` });
+res.end();
+return { props: {} };
 ```
 
-A static host works too — even `<meta http-equiv="refresh" content="0; url=steam://connect/IP:PORT">` does the job. The only requirement is that visiting the URL hands a `steam://…` to the browser.
+> ⚠️ **Validate the address.** Whatever serves this redirect — your app *or* an edge rule (Cloudflare / nginx) — must accept **only** a strict `host:port`. The value is attacker-controllable and becomes CS2 **launch arguments** (`steam://run/730//+connect <x>`), so an unvalidated value can inject `+exec`/other console commands into a visitor's client (e.g. `…/connect/host:27015%20+exec%20evil`).
 
-### Which `steam://` URL?
-
-There are two forms — pick whichever you prefer:
-
-| URL | Behaviour |
-|-----|-----------|
-| `steam://connect/<ip>:<port>` | Connects an **already-running** game. Wants an **IP**, so resolve the host first. |
-| `steam://run/730//+connect%20<host>:<port>` | **Launches CS2** (app `730`) with a `+connect` launch arg, then connects — works even if the game isn't open. Accepts a **hostname** (the game resolves it), so **no DNS lookup needed**. Note the URL-encoded space (`%20`) between `+connect` and the address. |
-
-The `run/730` form is the more robust one (launches the client and skips the DNS step) — e.g. `steam://run/730//+connect%20cs2.cstema.lt:27016`. Either is fine; just hand it to the browser the same way (`window.location` / `<meta refresh>` / a link).
+A static host or edge redirect works too, as long as it applies the same validation and the final URL is `steam://run/730//+connect%20<host>:<port>`.
 
 If you don't host such a page (or don't install [Motd](https://github.com/yappershq/Motd)), players use **"Connect manually"**, which prints `connect <ip:port>` to their console instead.
 
@@ -126,7 +115,7 @@ Outputs `.build/modules/ServerRedirect/ServerRedirect.dll` plus the bundled `loc
 
 ## 🙏 Credits
 
-Advertisement + leave-announce behaviour ported from [GAMMACASE/ServerRedirect](https://github.com/GAMMACASE/ServerRedirect) (SourceMod). The in-game connect flow uses the website's `steam://connect` page instead of the CSGO-era redirect trick.
+Advertisement + leave-announce behaviour ported from [GAMMACASE/ServerRedirect](https://github.com/GAMMACASE/ServerRedirect) (SourceMod). The in-game connect flow uses the website's `steam://run/730//+connect` redirect page instead of the CSGO-era redirect trick.
 
 ---
 
