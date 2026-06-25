@@ -199,32 +199,11 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
     private Menu BuildServerInfoMenu(ServerInfo server)
     {
         var menu = new Menu();
-        menu.SetTitle(server.Name);
+        // Stats in the title so they're always visible; the page only fits 5 body items, so we keep
+        // those for the action + as many player names as possible (prefix: connect first, then players).
+        menu.SetTitle($"{server.Name}   {server.Players}/{server.Max}   {server.Map}".TrimEnd());
 
-        menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.info_map", server.Map));
-        menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.info_players", server.Players, server.Max));
-
-        // Roster — when the source provides player names. Capped so a full server doesn't overflow.
-        if (server.PlayerNames.Count > 0)
-        {
-            const int cap = 10;
-            menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.players_header"));
-            foreach (var pn in server.PlayerNames.Take(cap))
-            {
-                var name = pn;
-                menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.player_entry", name));
-            }
-            if (server.PlayerNames.Count > cap)
-            {
-                var more = server.PlayerNames.Count - cap;
-                menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.players_more", more));
-            }
-        }
-
-        menu.AddSpacer();
-
-        // Single Connect action: open the website MOTD if available, otherwise print the
-        // connect command to console. Either way the player gets a chat line telling them what to do.
+        // Connect first (selectable) — the cursor lands here, so it stays at the top of the page view.
         menu.AddItem(
             c => _bridge.LocalizeHtml(c, "serverredirect.menu.connect"),
             ctrl =>
@@ -248,6 +227,14 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
 
                 ctrl.Exit();
             });
+
+        // Then every player as a selectable entry. They must be AddItem (not disabled) so the cursor
+        // can page through them — the menu is scrollable via F3/F4. Selecting a name is a no-op.
+        foreach (var pn in server.PlayerNames)
+        {
+            var name = pn;
+            menu.AddItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.player_entry", name), _ => { });
+        }
 
         menu.AddBackItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.back"));
         menu.AddExitItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.exit"));
@@ -332,7 +319,7 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
                 // Tell players to type `!servers <name>` rather than dumping a URL — the sub-command
                 // jumps straight to that server's connect menu. First word of the name matches the filter.
                 var firstCmd = _config.Commands.Count > 0 ? _config.Commands[0] : "servers";
-                var joinCmd  = $"{firstCmd} {pick.Name.Split(' ')[0]}";
+                var joinCmd  = $"{firstCmd} {pick.Name.Split(' ')[0].ToLowerInvariant()}";
 
                 _bridge.ModSharp.InvokeFrameAction(() =>
                 {

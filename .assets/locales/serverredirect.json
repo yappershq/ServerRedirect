@@ -5,26 +5,14 @@
   "serverredirect.menu.server_entry": {
     "en-us": "{0}  {{gold}}{1}/{2}{{default}}  {3}"
   },
-  "serverredirect.menu.info_map": {
-    "en-us": "Map: {{gold}}{0}"
-  },
-  "serverredirect.menu.info_players": {
-    "en-us": "Players: {{gold}}{0}/{1}"
-  },
   "serverredirect.menu.connect": {
     "en-us": "{{green}}Connect to this server"
   },
-  "serverredirect.menu.players_header": {
-    "en-us": "{{lime}}Players online:"
-  },
   "serverredirect.menu.player_entry": {
-    "en-us": "  {{default}}{0}"
-  },
-  "serverredirect.menu.players_more": {
-    "en-us": "  {{gold}}…and {0} more"
+    "en-us": "{{default}}{0}"
   },
   "serverredirect.connect_web_hint": {
-    "en-us": "{{green}}[Connect]{{default}} Opening {{gold}}{0}{{default}} — click {{green}}Connect{{default}} on the panel that just opened to join."
+    "en-us": "{{green}}[Servers]{{default}} To join {{gold}}{0}{{default}}: open the scoreboard ({{gold}}TAB{{default}}) and click {{green}}SERVER WEBSITE{{default}} at the bottom-left."
   },
   "serverredirect.menu.back": {
     "en-us": "« Back"

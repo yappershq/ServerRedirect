@@ -119,8 +119,8 @@ internal sealed class AdConfig
 {
     [JsonPropertyName("enabled")]          public bool   Enabled         { get; set; } = true;
     [JsonPropertyName("interval_seconds")] public int    IntervalSeconds { get; set; } = 180;
-    [JsonPropertyName("min_players")]      public int    MinPlayers      { get; set; } = 3;
+    [JsonPropertyName("min_players")]      public int    MinPlayers      { get; set; } = 1;
     /// <summary>"most_players" | "rotate" | "random"</summary>
-    [JsonPropertyName("order")]            public string Order           { get; set; } = "most_players";
+    [JsonPropertyName("order")]            public string Order           { get; set; } = "rotate";
     [JsonPropertyName("message_key")]      public string MessageKey      { get; set; } = "serverredirect.ad.line";
 }
