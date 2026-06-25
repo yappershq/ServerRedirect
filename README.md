@@ -101,7 +101,18 @@ export const getServerSideProps = async ({ params }) => {
 useEffect(() => { window.location.href = steamUrl; }, [steamUrl]);
 ```
 
-A static host works too — even `<meta http-equiv="refresh" content="0; url=steam://connect/IP:PORT">` does the job. The only requirement is that visiting the URL hands a `steam://connect/...` to the browser.
+A static host works too — even `<meta http-equiv="refresh" content="0; url=steam://connect/IP:PORT">` does the job. The only requirement is that visiting the URL hands a `steam://…` to the browser.
+
+### Which `steam://` URL?
+
+There are two forms — pick whichever you prefer:
+
+| URL | Behaviour |
+|-----|-----------|
+| `steam://connect/<ip>:<port>` | Connects an **already-running** game. Wants an **IP**, so resolve the host first. |
+| `steam://run/730//+connect%20<host>:<port>` | **Launches CS2** (app `730`) with a `+connect` launch arg, then connects — works even if the game isn't open. Accepts a **hostname** (the game resolves it), so **no DNS lookup needed**. Note the URL-encoded space (`%20`) between `+connect` and the address. |
+
+The `run/730` form is the more robust one (launches the client and skips the DNS step) — e.g. `steam://run/730//+connect%20cs2.cstema.lt:27016`. Either is fine; just hand it to the browser the same way (`window.location` / `<meta refresh>` / a link).
 
 If you don't host such a page (or don't install [Motd](https://github.com/yappershq/Motd)), players use **"Connect manually"**, which prints `connect <ip:port>` to their console instead.
 
