@@ -2,6 +2,9 @@
   <PropertyGroup>
     <AssemblyName>ServerRedirect</AssemblyName>
     <RootNamespace>ServerRedirect</RootNamespace>
+    <!-- Ship NuGet RUNTIME deps (SteamQuery.NET) into the module folder so ModSharp can load them.
+         ModSharp/.Shared refs use ExcludeAssets="runtime" so the host-provided ones aren't copied. -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
