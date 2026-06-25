@@ -5,6 +5,7 @@ using Motd.Shared;
 using Sharp.Modules.LocalizerManager.Shared;
 using Sharp.Modules.MenuManager.Shared;
 using Sharp.Shared;
+using Sharp.Shared.Definition;
 using Sharp.Shared.Managers;
 using Sharp.Shared.Objects;
 
@@ -95,20 +96,67 @@ internal sealed class InterfaceBridge
         }
     }
 
-    /// <summary>Localize a key for a client. Falls back to the raw key on any failure.</summary>
+    /// <summary>Localize a key, rendering {color} tokens as CHAT control chars. Falls back to the raw key.</summary>
     internal string Localize(IGameClient client, string key, params object?[] args)
+        => Render(client, key, html: false, args);
+
+    /// <summary>Localize a key for MENU items, rendering {color} tokens as HTML &lt;font&gt; tags (CS2 menus are center-HTML).</summary>
+    internal string LocalizeHtml(IGameClient client, string key, params object?[] args)
+        => Render(client, key, html: true, args);
+
+    private string Render(IGameClient client, string key, bool html, object?[] args)
     {
         if (LocalizerManager?.For(client) is not { } locale)
             return key;
 
         try
         {
-            var text = locale.Text(key, args);
-            return text;
+            return ApplyColors(locale.Text(key, args), html);
         }
         catch
         {
             return key;
         }
     }
+
+    // Locale stores {{token}}; string.Format un-escapes it to {token}. Chat uses control chars,
+    // menus are center-HTML so they need <font color> tags instead. {default} closes/resets.
+    private static string ApplyColors(string text, bool html)
+    {
+        foreach (var (token, chat, htmlTag) in ColorTokens)
+            text = text.Replace(token, html ? htmlTag : chat);
+
+        if (html)
+        {
+            // MenuManager wraps each item in its own <font color='...'>{title}</font>. An unclosed
+            // <font> from a token (e.g. a title that opens {green} but never {default}) would eat
+            // that wrapper's </font> and bleed into sibling items — so pad the missing closers.
+            var unclosed = (text.Split("<font ").Length - 1) - (text.Split("</font>").Length - 1);
+            for (var i = 0; i < unclosed; i++)
+                text += "</font>";
+        }
+
+        return text;
+    }
+
+    private static readonly (string token, string chat, string html)[] ColorTokens =
+    [
+        ("{default}",    ChatColor.White,      "</font>"),
+        ("{white}",      ChatColor.White,      "<font color='#ffffff'>"),
+        ("{darkred}",    ChatColor.DarkRed,    "<font color='#8b0000'>"),
+        ("{pink}",       ChatColor.Pink,       "<font color='#ff69b4'>"),
+        ("{green}",      ChatColor.Green,      "<font color='#40ff40'>"),
+        ("{lightgreen}", ChatColor.LightGreen, "<font color='#99ff99'>"),
+        ("{lime}",       ChatColor.Lime,       "<font color='#00ff00'>"),
+        ("{red}",        ChatColor.Red,        "<font color='#ff4040'>"),
+        ("{grey}",       ChatColor.Grey,       "<font color='#cccccc'>"),
+        ("{gray}",       ChatColor.Grey,       "<font color='#cccccc'>"),
+        ("{yellow}",     ChatColor.Yellow,     "<font color='#ffff00'>"),
+        ("{gold}",       ChatColor.Gold,       "<font color='#ffd700'>"),
+        ("{silver}",     ChatColor.Silver,     "<font color='#c0c0c0'>"),
+        ("{blue}",       ChatColor.Blue,       "<font color='#6699ff'>"),
+        ("{darkblue}",   ChatColor.DarkBlue,   "<font color='#2222ff'>"),
+        ("{purple}",     ChatColor.Purple,     "<font color='#b266ff'>"),
+        ("{lightred}",   ChatColor.LightRed,   "<font color='#ff8080'>"),
+    ];
 }

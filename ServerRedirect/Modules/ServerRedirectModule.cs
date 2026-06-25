@@ -174,7 +174,7 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
     private Menu BuildServerListMenu(IReadOnlyList<ServerInfo> servers)
     {
         var menu = new Menu();
-        menu.SetTitle(c => _bridge.Localize(c, "serverredirect.menu.title"));
+        menu.SetTitle(c => _bridge.LocalizeHtml(c, "serverredirect.menu.title"));
 
         if (servers.Count == 0)
         {
@@ -186,13 +186,13 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
             {
                 var captured = server;
                 menu.AddItem(
-                    c => _bridge.Localize(c, "serverredirect.menu.server_entry",
+                    c => _bridge.LocalizeHtml(c, "serverredirect.menu.server_entry",
                         captured.Name, captured.Players, captured.Max, captured.Map),
                     ctrl => ctrl.Next(BuildServerInfoMenu(captured)));
             }
         }
 
-        menu.AddExitItem(c => _bridge.Localize(c, "serverredirect.menu.exit"));
+        menu.AddExitItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.exit"));
         return menu;
     }
 
@@ -201,15 +201,15 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
         var menu = new Menu();
         menu.SetTitle(server.Name);
 
-        menu.AddDisabledItem(c => _bridge.Localize(c, "serverredirect.menu.info_map", server.Map));
-        menu.AddDisabledItem(c => _bridge.Localize(c, "serverredirect.menu.info_players", server.Players, server.Max));
+        menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.info_map", server.Map));
+        menu.AddDisabledItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.info_players", server.Players, server.Max));
         menu.AddSpacer();
 
         // Connect via website (MOTD)
         if (_bridge.MotdShared is not null)
         {
             menu.AddItem(
-                c => _bridge.Localize(c, "serverredirect.menu.connect_web"),
+                c => _bridge.LocalizeHtml(c, "serverredirect.menu.connect_web"),
                 ctrl =>
                 {
                     var client   = ctrl.Client;
@@ -223,7 +223,7 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
 
         // Connect manually (print connect string)
         menu.AddItem(
-            c => _bridge.Localize(c, "serverredirect.menu.connect_manual"),
+            c => _bridge.LocalizeHtml(c, "serverredirect.menu.connect_manual"),
             ctrl =>
             {
                 var client   = ctrl.Client;
@@ -234,8 +234,8 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
                 ctrl.Exit();
             });
 
-        menu.AddBackItem(c => _bridge.Localize(c, "serverredirect.menu.back"));
-        menu.AddExitItem(c => _bridge.Localize(c, "serverredirect.menu.exit"));
+        menu.AddBackItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.back"));
+        menu.AddExitItem(c => _bridge.LocalizeHtml(c, "serverredirect.menu.exit"));
         return menu;
     }
 
