@@ -121,14 +121,35 @@ internal sealed class ServerRedirectModule : IModule, IClientListener
             return;
         }
 
+        // Optional argument: `!servers <name>` filters by server name (case-insensitive substring).
+        // One match → jump straight to that server; several → show the filtered list; none → notice.
+        IReadOnlyList<ServerInfo> shown = servers;
+        ServerInfo?               jumpTo = null;
+        if (command.ArgCount >= 1)
+        {
+            var query   = command.GetArg(1);
+            var matches = servers.Where(s => s.Name.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (matches.Count == 0)
+            {
+                client.Print(HudPrintChannel.Chat, _bridge.Localize(client, "serverredirect.no_match", query));
+                return;
+            }
+
+            shown = matches;
+            if (matches.Count == 1)
+                jumpTo = matches[0];
+        }
+
         if (_bridge.MenuManager is not { } mm)
         {
             // No menu manager — print list to chat
-            PrintServerList(client, servers);
+            PrintServerList(client, shown);
             return;
         }
 
-        mm.DisplayMenu(client, BuildServerListMenu(servers));
+        mm.DisplayMenu(client, jumpTo is { } target
+            ? BuildServerInfoMenu(target)
+            : BuildServerListMenu(shown));
     }
 
     private void PrintServerList(IGameClient client, IReadOnlyList<ServerInfo> servers)

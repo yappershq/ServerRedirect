@@ -35,6 +35,9 @@
   "serverredirect.no_servers": {
     "en-us": "{{darkred}}[Servers]{{default}} No other servers are online right now."
   },
+  "serverredirect.no_match": {
+    "en-us": "{{darkred}}[Servers]{{default}} No server matching {{gold}}{0}{{default}}."
+  },
   "serverredirect.unavailable": {
     "en-us": "{{darkred}}[Servers]{{default}} Server list is loading, please try again in a moment."
   },

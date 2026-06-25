@@ -44,8 +44,9 @@ Chat commands are configurable (`commands` in the config). Defaults — no permi
 |---------|-------------|
 | `!servers` | Open the server browser menu |
 | `!redirect` | Alias for the same menu |
+| `!servers <name>` | Jump straight to a server by name (e.g. `!servers mix`) |
 
-The menu is: **server list** (name · players/max · map) → **server info** → **connect** (via website MOTD, or manual console command).
+With no argument, the menu is **server list** (name · players/max · map) → **server info** → **connect** (via website MOTD, or manual console command). With a `<name>` argument, the name is matched (case-insensitive substring): a single match opens that server's connect options directly, several show the filtered list, none shows a notice.
 
 ## ⚙️ Configuration
 
