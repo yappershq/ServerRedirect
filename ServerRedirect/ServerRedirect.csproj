@@ -11,11 +11,9 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
     <!-- SteamQuery.NET — A2S_INFO queries for the a2s data source. Only used when data_source=a2s. -->
     <PackageReference Include="SteamQuery.NET" Version="2.0.2" />
-    <!-- Motd.Shared — optional, resolved in OAM. DLL reference (not published on NuGet). -->
-    <Reference Include="Motd.Shared">
-      <HintPath>$(MSBuildThisFileDirectory)..\..\Motd\.build\shared\Motd.Shared\Motd.Shared.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+    <!-- Motd.Shared — optional, resolved in OAM. Compile-time only; the runtime DLL is provided by
+         the Motd plugin via /game/sharp/shared/. -->
+    <PackageReference Include="YappersHQ.Motd.Shared" Version="1.0.0" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <!-- Ship .assets/* into .build/ so modsharp-deploy bundles it to /game/sharp/. -->
